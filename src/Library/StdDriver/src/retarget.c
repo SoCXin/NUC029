@@ -6,6 +6,7 @@
  * @brief    NUC029 Series Debug Port and Semihost Setting Source File
  *
  * @note
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2011 Nuvoton Technology Corp. All rights reserved.
  *
  ******************************************************************************/
@@ -435,12 +436,13 @@ void SendChar_ToUART(int ch)
 {
 
     while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
-    DEBUG_PORT->DATA = ch;
     if(ch == '\n')
     {
-        while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
         DEBUG_PORT->DATA = '\r';
+        while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
     }
+
+    DEBUG_PORT->DATA = ch;
 }
 
 /**
@@ -598,16 +600,18 @@ int _write (int fd, char *ptr, int len)
 {
     int i = len;
 
-    while(i--) {
+    while(i--)
+    {
         while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
 
-        DEBUG_PORT->DATA = *ptr++;
-
-        if(*ptr == '\n') {
-            while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
+        if(*ptr == '\n')
+        {
             DEBUG_PORT->DATA = '\r';
+            while(DEBUG_PORT->FSR & UART_FSR_TX_FULL_Msk);
         }
-    }
+
+        DEBUG_PORT->DATA = *ptr++;
+	}
     return len;
 }
 
